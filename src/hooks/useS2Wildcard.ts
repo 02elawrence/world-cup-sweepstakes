@@ -2,8 +2,8 @@ import { useMemo } from 'react';
 import type { TournamentData } from '../types';
 import { API_ID_TO_TEAM_ID, TEAM_MAP } from '../data/teams';
 
-// Pot 1 teams (FIFA rank 1–12)
-const POT1_API_IDS = new Set([762, 773, 760, 770, 764, 765, 8601, 759, 805, 815, 818, 771]);
+// Pot 1 teams for this sweepstake: ARG, FRA, ESP, ENG, BRA, POR, NED, GER, BEL, CRO
+const POT1_API_IDS = new Set([762, 773, 760, 770, 764, 765, 8601, 759, 805, 799]);
 
 // Wildcard teams and their API IDs (apiId 0 = placeholder, can't be auto-detected)
 const WILDCARD_API_IDS = new Set([
