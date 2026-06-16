@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 const BASE = 'https://api.football-data.org/v4';
-const KEY = process.env.VITE_FOOTBALL_API_KEY ?? '';
+const KEY = process.env.FOOTBALL_DATA_API_KEY ?? '';
 const HEADERS = { 'X-Auth-Token': KEY };
 
 async function apiFetch(path: string) {
