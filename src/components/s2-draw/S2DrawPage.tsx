@@ -3,7 +3,7 @@ import { TEAM_MAP } from '../../data/teams';
 import { S2_PLAYERS } from '../../data/s2Players';
 import { WILDCARD_TEAM_IDS } from '../../hooks/useS2Wildcard';
 
-const POT1_IDS = new Set(['ARG', 'FRA', 'ESP', 'ENG', 'BRA', 'POR', 'NED', 'GER', 'BEL', 'MAR', 'COL', 'USA']);
+const POT1_IDS = new Set(['ARG', 'FRA', 'ESP', 'ENG', 'BRA', 'POR', 'NED', 'GER', 'BEL', 'CRO']);
 
 function tierBadge(teamId: string): { label: string; cls: string } | null {
   if (POT1_IDS.has(teamId)) return { label: 'Pot 1', cls: 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/40' };
