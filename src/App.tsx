@@ -5,6 +5,8 @@ import S2LeaderboardPage from './components/s2-leaderboard/S2LeaderboardPage';
 
 const NAV = [
   { to: '/tournament', label: '⚽ Tournament' },
+  { to: '/s2-draw', label: '🎉 Draw' },
+  { to: '/s2-leaderboard', label: '💰 Board' },
 ];
 
 function Layout({ children }: { children: React.ReactNode }) {
@@ -41,7 +43,7 @@ export default function App() {
           <Route path="/tournament" element={<TournamentPage />} />
           <Route path="/s2-draw" element={<S2DrawPage />} />
           <Route path="/s2-leaderboard" element={<S2LeaderboardPage />} />
-          <Route path="*" element={<Navigate to="/tournament" replace />} />
+          <Route path="*" element={<Navigate to="/s2-draw" replace />} />
         </Routes>
       </Layout>
     </BrowserRouter>
