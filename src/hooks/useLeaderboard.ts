@@ -3,21 +3,24 @@ import type { DraftState, TournamentData, PlayerScore, TeamScore, PlayerId } fro
 import { TEAM_MAP } from '../data/teams';
 
 interface TeamStats {
-  won: number;
+  groupWon: number;
+  knockoutWins: number;
   drawn: number;
   lost: number;
   goalsFor: number;
   goalsAgainst: number;
 }
 
-// Calculate every team's stats directly from individual finished matches.
-// This is more real-time than the standings endpoint and handles both
-// group stage and knockout rounds in one pass.
+const KNOCKOUT_STAGES = new Set([
+  'ROUND_OF_32', 'LAST_32', 'ROUND_OF_16', 'LAST_16',
+  'QUARTER_FINALS', 'SEMI_FINALS', 'FINAL',
+]);
+
 function buildStatsFromMatches(data: TournamentData): Map<number, TeamStats> {
   const map = new Map<number, TeamStats>();
 
   const ensure = (id: number) => {
-    if (!map.has(id)) map.set(id, { won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0 });
+    if (!map.has(id)) map.set(id, { groupWon: 0, knockoutWins: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0 });
   };
 
   for (const fixture of data.fixtures) {
@@ -36,9 +39,24 @@ function buildStatsFromMatches(data: TournamentData): Map<number, TeamStats> {
     h.goalsFor += home;  h.goalsAgainst += away;
     a.goalsFor += away;  a.goalsAgainst += home;
 
-    if (home > away)       { h.won++;   a.lost++;  }
-    else if (away > home)  { a.won++;   h.lost++;  }
-    else                   { h.drawn++; a.drawn++; } // includes penalty-win games
+    if (KNOCKOUT_STAGES.has(fixture.stage)) {
+      // Determine who advances — wins in 90 mins, AET, or on penalties all count equally
+      let winnerId: number;
+      if (home > away) {
+        winnerId = hId;
+      } else if (away > home) {
+        winnerId = aId;
+      } else {
+        const pen = fixture.score.penalties;
+        winnerId = (pen?.home ?? 0) > (pen?.away ?? 0) ? hId : aId;
+      }
+      if (winnerId === hId) { h.knockoutWins++; a.lost++; }
+      else                  { a.knockoutWins++; h.lost++; }
+    } else {
+      if (home > away)      { h.groupWon++; a.lost++;  }
+      else if (away > home) { a.groupWon++; h.lost++;  }
+      else                  { h.drawn++;    a.drawn++; }
+    }
   }
 
   return map;
@@ -76,13 +94,15 @@ export function useLeaderboard(draftState: DraftState, tournamentData: Tournamen
         if (!teamMeta) return null;
 
         const stats = teamMeta.apiId ? teamStats.get(teamMeta.apiId) : undefined;
-        const won   = stats?.won   ?? 0;
+        const groupWon = stats?.groupWon ?? 0;
+        const knockoutWins = stats?.knockoutWins ?? 0;
+        const won   = groupWon + knockoutWins;
         const drawn = stats?.drawn ?? 0;
         const lost  = stats?.lost  ?? 0;
         const gf    = stats?.goalsFor     ?? 0;
         const ga    = stats?.goalsAgainst ?? 0;
         const isChampion = teamMeta.apiId !== 0 && teamMeta.apiId === winnerApiId;
-        const points = won * 3 + drawn + (isChampion ? 5 : 0);
+        const points = groupWon * 3 + drawn + knockoutWins * 4 + (isChampion ? 5 : 0);
 
         return {
           teamId,
